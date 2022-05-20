@@ -7,7 +7,33 @@ class Game
     @name_trainer = ""
     @initial_poke = ""
     @initial_poke_name = ""
-    @initial_poke_lvl=1
+    @initial_poke_lvl = 1
+  end
+
+  def start
+    print_welcome
+
+    # Create a welcome method(s) to get the name, pokemon and pokemon_name from the user
+
+    # Then create a Player with that information and store it in @player
+
+    # Suggested game flow
+    action = menu
+    until action == "Exit"
+      case action
+      when "Train"
+        train
+        action = menu
+      when "Leader"
+        challenge_leader
+        action = menu
+      when "Stats"
+        show_stats
+        action = menu
+      end
+    end
+
+    goodbye
   end
 
   def valid_trainer_name
@@ -60,74 +86,29 @@ class Game
     @initial_poke_name = @initial_poke if @initial_poke_name.empty?
   end
 
-  def stats
-    pokemons = Pokedex::POKEMONS
-    poke_info = pokemons.values_at(@initial_poke.capitalize)[0]
-    # p poke_info[:base_stats]
-    puts "\n#{@initial_poke_name} :"
-    puts "Kind: #{@initial_poke}"
-    puts "Type: #{poke_info[:type].join(', ')}"
-    puts "Stats:"
-    labels = ["HP: ", "Attack: ", "Defense: ", "Special Attack: ", "Special Defense: ", "Speed: "]
-    (0..labels.length-1).each do |i|
-      print labels[i]
-      puts poke_info[:base_stats].values[i]
-    end
-    print "Experience Points: "
-    puts 0 #esto cambiara
-  end
-
-  def start
-    print_welcome
-    
-    # Create a welcome method(s) to get the name, pokemon and pokemon_name from the user
-
-    # Then create a Player with that information and store it in @player
-
-    # Suggested game flow
-    puts "-----------------------Menu-----------------------"
-    puts "1. Stats        2. Train        3. Leader       4. Exit"
-    action = gets.chomp
-    until action == "Exit"
-      case action
-      when "Train"
-        train
-        action = menu
-      when "Leader"
-        challenge_leader
-        action = menu
-      when "Stats"
-
-        stats
-        action = menu
-      end
-    end
-
-    goodbye
-  end
-
   def train
     pokemons = Pokedex::POKEMONS
-    pokemon = pokemons.keys[rand(0..pokemons.length)]
-    level=rand(0..10)
+    target = pokemons.keys[rand(0..pokemons.length)]
+    level = rand(1..10)
     puts "Great master challenge Random Person for training"
-    puts "Random Person has a #{pokemon} level #{level}"
+    puts "Random Person has a #{target} level #{level}"
     puts "What do you want to do now? \n"
     puts "1. Fight        2. Leave"
-    print ">"
-    action = gets.chomp
-    if action =="fight"
-      fight
-    else
-      # menu
+    loop do
+      print ">"
+      action = gets.chomp
+      next unless ["Leave", "Fight"].include?(action)
+
+      fight(target, level) if action == "Fight"
+      break
     end
   end
-  
-  def fight(pokemon, level)
-    puts "Random Person sent out #{pokemon.upcase}!"
+
+  def fight(target, _level)
+    puts "Random Person sent out #{target.upcase}!"
     puts "Great master sent out #{@initial_poke_name.upcase}!"
     puts "-------------------Battle Start!-------------------"
-    puts 
+    puts
   end
 
   def challenge_leader
@@ -135,7 +116,20 @@ class Game
   end
 
   def show_stats
-    # Complete this
+    pokemons = Pokedex::POKEMONS
+    poke_info = pokemons[@initial_poke]
+    # # Debemos corregir de donde sacamos los stats
+    puts "\n#{@initial_poke_name} :"
+    puts "Kind: #{@initial_poke}"
+    puts "Type: #{poke_info[:type].join(', ')}"
+    puts "Stats:"
+    labels = ["HP: ", "Attack: ", "Defense: ", "Special Attack: ", "Special Defense: ", "Speed: "]
+    (0..labels.length - 1).each do |i|
+      print labels[i]
+      puts poke_info[:base_stats].values[i]
+    end
+    print "Experience Points: "
+    puts 0 # esto cambiara
   end
 
   def goodbye
@@ -143,7 +137,18 @@ class Game
   end
 
   def menu
-    # Complete this
+    puts "-----------------------Menu-----------------------"
+    puts "1. Stats        2. Train        3. Leader       4. Exit"
+    options = ["Stats", "Train", "Leader", "Exit"]
+    action = ""
+    loop do
+      print "> "
+      action = gets.chomp
+      next unless options.include?(action)
+
+      break
+    end
+    action
   end
 end
 

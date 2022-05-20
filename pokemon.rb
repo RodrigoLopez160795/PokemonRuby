@@ -2,16 +2,20 @@
 require_relative "pokedex/pokemons"
 class Pokemon
   # include neccesary modules
- 
+
   # (complete parameters)
   def initialize
     pokemons = Pokedex::POKEMONS
     poke_info = pokemons.values_at("bulbasaur".capitalize)[0]
-    base_stats= poke_info[:base_stats]
-    @level=1
-    @individual_values= {hp: rand(0..31), attack: rand(0..31), defense: rand(0..31), special_attack: rand(0..31), special_defense: rand(0..31), speed: rand(0..31) }
-    @effort_values= {hp: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0 }
-    @base_values=base_stats
+    base_stats = poke_info[:base_stats]
+    keys = %i[hp attack defense special_attack special_defense speed]
+    default_values = []
+    keys.length.times { default_values << rand(0..31) }
+    @individual_values = keys.zip(default_values).to_h
+    # puts  @individual_values
+    @level = 1
+    @effort_values = { hp: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0 }
+    @base_values = base_stats
     # Retrieve pokemon info from Pokedex and set instance variables
     # Calculate Individual Values and store them in instance variable
     # Create instance variable with effort values. All set to 0
@@ -53,9 +57,9 @@ class Pokemon
     # Else, print "But it MISSED!"
   end
 
-  def increase_stats(target)
-    #aqui cambian los effort_values dependiendo del target (pokemon oponente)
-    hp=((2 * @base_values[:hp] + @individual_values[:hp] + @effort_values[:hp]) * @level / 100 + @level + 10).floor
+  def increase_stats(_target)
+    # aqui cambian los effort_values dependiendo del target (pokemon oponente)
+    hp = ((2 * @base_values[:hp] + @individual_values[:hp] + @effort_values[:hp]) * @level / 100 + @level + 10).floor
     # Increase stats base on the defeated pokemon and print message "#[pokemon name] gained [amount] experience points"
 
     # If the new experience point are enough to level up, do it and print
@@ -66,5 +70,5 @@ class Pokemon
   # Create here auxiliary methods
 end
 
-poke=Pokemon.new
+poke = Pokemon.new
 puts poke.increase_stats("hola")
