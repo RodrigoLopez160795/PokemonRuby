@@ -7,9 +7,9 @@ class Pokemon
 
   # (complete parameters)
   def initialize(string)
-    pokemons = Pokedex::POKEMONS
+    @pokemons = Pokedex::POKEMONS
     # string = "bulbasaur" o "charmander" o "squirtle"
-    poke_info = pokemons[string]
+    poke_info = @pokemons[string]
     base_stats = poke_info[:base_stats]
     keys = %i[hp attack defense special_attack special_defense speed]
     default_values = []
@@ -25,6 +25,7 @@ class Pokemon
     @special_atack = 0
     @special_defense = 0
     @speed = 0
+    @remaining_experience = 0
     # Retrieve pokemon info from Pokedex and set instance variables
     # Calculate Individual Values and store them in instance variable
     # Create instance variable with effort values. All set to 0
@@ -65,6 +66,43 @@ class Pokemon
     # -- Inflict damage to target and print message "And it hit [target name] with [damage] damage""
     # Else, print "But it MISSED!"
   end
+  def increase_level (gain_experience,growth_rate)
+    gain_experience += @remaining_experience
+    cont = 0
+    while gain_experience > cont
+      cont = calculate_next_level(growth_rate)
+      if gain_experience > cont
+        @level += 1
+        puts "#{@initial_poke_name} you reached level #{@level}!"
+      end
+      gain_experience -= cont
+    end
+    @remaining_experience = gain_experience
+
+  end
+  def calculate_next_level(growth_rate)
+    to_new_level = 0
+    case growth_rate
+    when "slow"
+      to_new_level = ((5*(@level**3))/4.0).round(0) #@level
+    when "medium_slow"
+      to_new_level = ((6*(@level**3)/5.0)-(15*(@level**2))+(100*@level)-140).round(0)
+    when "medium_fast"
+      to_new_level = @level**3
+    when "fast"
+      to_new_level = (4*(@level**3)/5.0).round(0)
+    end
+    to_new_level
+  end
+
+  def change_level(initial_poke,enemy_level)
+    pokemons = Pokedex::POKEMONS
+    poke_info = pokemons[initial_poke] # initial poke
+    base_exp = poke_info[:base_exp]
+    growth_rate = poke_info[:growth_rate].to_s
+    gain_experience = (base_exp * enemy_level / 7).floor
+    increase_level(gain_experience, growth_rate)
+  end
 
   def increase_stats(_target)
     # aqui cambian los effort_values dependiendo del target (pokemon oponente)
@@ -100,6 +138,9 @@ end
 poke = Pokemon.new("Charmander")
 # poke.increase_stats("hola")
 
-puts poke.increase_stats("hola")
-puts poke.level
-puts poke.hp
+# puts poke.increase_stats("hola")
+# puts poke.level
+# puts poke.hp
+
+# poke.change_level("Pikachu",1)
+
