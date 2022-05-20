@@ -1,12 +1,15 @@
 # require neccesary files
 require_relative "pokedex/pokemons"
+
 class Pokemon
   # include neccesary modules
+  attr_reader :level, :hp, :attack, :defense, :special_attack, :special_defense, :special_defense
 
   # (complete parameters)
-  def initialize
+  def initialize(string)
     pokemons = Pokedex::POKEMONS
-    poke_info = pokemons.values_at("bulbasaur".capitalize)[0]
+    # string = "bulbasaur" o "charmander" o "squirtle"
+    poke_info = pokemons[string]
     base_stats = poke_info[:base_stats]
     keys = %i[hp attack defense special_attack special_defense speed]
     default_values = []
@@ -16,6 +19,12 @@ class Pokemon
     @level = 1
     @effort_values = { hp: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0 }
     @base_values = base_stats
+    @hp = 0
+    @attack = 0
+    @defense = 0
+    @special_atack = 0
+    @special_defense = 0
+    @speed = 0
     # Retrieve pokemon info from Pokedex and set instance variables
     # Calculate Individual Values and store them in instance variable
     # Create instance variable with effort values. All set to 0
@@ -59,7 +68,25 @@ class Pokemon
 
   def increase_stats(_target)
     # aqui cambian los effort_values dependiendo del target (pokemon oponente)
-    hp = ((2 * @base_values[:hp] + @individual_values[:hp] + @effort_values[:hp]) * @level / 100 + @level + 10).floor
+    keys = %i[hp attack defense special_attack special_defense speed]
+    stat_values = []
+    keys.each do |key|
+      const = key == :hp ? 10 : 5
+      stat_value = ((2 * @base_values[key] + @individual_values[key] + @effort_values[key]) * @level / 100 + @level + const).floor
+      stat_values << stat_value
+    end
+    hash = keys.zip(stat_values).to_h
+    # Pensar en una forma más efectiva de aisgnar estos valores
+    @hp = hash[:hp]
+    @attack = hash [:attack]
+    @defense = hash [:defense]
+    @special_atack = hash [:special_atack]
+    @special_defense = hash [:special_defense]
+    @speed = hash [:speed]
+
+    stat_values
+    # hp = ((2 * @base_values[:hp] + @individual_values[:hp] + @effort_values[:hp]) * @level / 100 + @level + 10).floor
+
     # Increase stats base on the defeated pokemon and print message "#[pokemon name] gained [amount] experience points"
 
     # If the new experience point are enough to level up, do it and print
@@ -70,5 +97,9 @@ class Pokemon
   # Create here auxiliary methods
 end
 
-poke = Pokemon.new
+poke = Pokemon.new("Charmander")
+# poke.increase_stats("hola")
+
 puts poke.increase_stats("hola")
+puts poke.level
+puts poke.hp

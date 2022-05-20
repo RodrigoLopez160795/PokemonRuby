@@ -1,13 +1,15 @@
 # require neccesary files
 require_relative "pokedex/pokemons"
 require_relative "pokedex/moves"
-
+require_relative "pokemon"
 class Game
+  attr_reader :initial_poke, :initial_poke_name, :name_trainer
+
   def initialize
     @name_trainer = ""
     @initial_poke = ""
     @initial_poke_name = ""
-    @initial_poke_lvl = 1
+    @poke = ""
   end
 
   def start
@@ -79,6 +81,7 @@ class Game
     valid_trainer_name
     puts "\n 1. Bulbasaur    2. Charmander   3. Squirtle"
     valid_initial_pokemon
+    @poke = Pokemon.new(@initial_poke)
     puts "You selected #{@initial_poke.upcase}. Great choice!"
     puts "Give your pokemon a name?"
     print "> "
@@ -95,7 +98,7 @@ class Game
     puts "What do you want to do now? \n"
     puts "1. Fight        2. Leave"
     loop do
-      print ">"
+      print "> "
       action = gets.chomp
       next unless ["Leave", "Fight"].include?(action)
 
@@ -104,11 +107,15 @@ class Game
     end
   end
 
-  def fight(target, _level)
+  def fight(target, level)
     puts "Random Person sent out #{target.upcase}!"
     puts "Great master sent out #{@initial_poke_name.upcase}!"
     puts "-------------------Battle Start!-------------------"
-    puts
+    puts "#{@name_trainer}'s #{@initial_poke_name} - Level #{@poke.level}"
+    print "HP: "
+    @poke.increase_stats("hola")
+    puts @poke.hp
+    puts "Random person's #{target} - Level #{level}"
   end
 
   def challenge_leader
@@ -151,6 +158,8 @@ class Game
     action
   end
 end
-
+# poke= Pokemon.new
 game = Game.new
 game.start
+
+# p poke.level
