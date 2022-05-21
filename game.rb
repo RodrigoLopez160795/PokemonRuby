@@ -10,6 +10,7 @@ class Game
     @initial_poke = ""
     @initial_poke_name = ""
     @poke = ""
+    @current_stats = {}
   end
 
   def start
@@ -24,12 +25,14 @@ class Game
     until action == "Exit"
       case action
       when "Train"
+
         train
         action = menu
       when "Leader"
         challenge_leader
         action = menu
       when "Stats"
+
         show_stats
         action = menu
       end
@@ -64,6 +67,8 @@ class Game
 
       break
     end
+    @poke = Pokemon.new(@initial_poke)
+    @current_stats = @poke.increase_stats("target", 1)
   end
 
   def print_welcome
@@ -81,7 +86,6 @@ class Game
     valid_trainer_name
     puts "\n 1. Bulbasaur    2. Charmander   3. Squirtle"
     valid_initial_pokemon
-    @poke = Pokemon.new(@initial_poke)
     puts "You selected #{@initial_poke.upcase}. Great choice!"
     puts "Give your pokemon a name?"
     print "> "
@@ -91,9 +95,9 @@ class Game
 
   def train
     pokemons = Pokedex::POKEMONS
-    target = pokemons.keys[rand(0..pokemons.length)]
+    target = pokemons.keys[rand(0..pokemons.length - 1)]
     level = rand(1..10)
-    puts "Great master challenge Random Person for training"
+    puts "#{@name_trainer} challenge Random Person for training"
     puts "Random Person has a #{target} level #{level}"
     puts "What do you want to do now? \n"
     puts "1. Fight        2. Leave"
@@ -113,9 +117,24 @@ class Game
     puts "-------------------Battle Start!-------------------"
     puts "#{@name_trainer}'s #{@initial_poke_name} - Level #{@poke.level}"
     print "HP: "
-    @poke.increase_stats("hola")
-    puts @poke.hp
+    puts @current_stats[:hp]
     puts "Random person's #{target} - Level #{level}"
+    print "HP: "
+    puts o_current_stats[:hp]
+    opponent = Pokemon.new(target)
+    # Battle.new(@name_trainer,@poke,opponent,level)
+    # podemos llamar a la clase battle
+    o_current_stats = opponent.increase_stats(target, level)
+    o_poke_moves = opponent.poke_info[:moves]
+    o_move = o_poke_moves[rand(0..o_poke_moves.length - 1)]
+    o_priority = Pokedex::MOVES[o_move][:priority]
+    puts "#{@name_trainer}, select your move:"
+    move = @poke.set_current_move
+    p priority = Pokedex::MOVES[move][:priority]
+    p o_move
+    p o_priority
+
+    # llamar al metodo set_current_move
   end
 
   def challenge_leader
@@ -130,10 +149,16 @@ class Game
     puts "Kind: #{@initial_poke}"
     puts "Type: #{poke_info[:type].join(', ')}"
     puts "Stats:"
+    # puts "HP: #{@poke.hp}"
+    # puts "Attack: #{@poke.attack}"
+    # puts "Defense: #{@poke.defense}"
+    # puts "Special Attack: #{@poke.special_attack}"
+    # puts "Special Defense: #{@poke.special_defense}"
+    # puts "Speed: #{@poke.speed}"
     labels = ["HP: ", "Attack: ", "Defense: ", "Special Attack: ", "Special Defense: ", "Speed: "]
     (0..labels.length - 1).each do |i|
       print labels[i]
-      puts poke_info[:base_stats].values[i]
+      puts @current_stats.values[i]
     end
     print "Experience Points: "
     puts 0 # esto cambiara
