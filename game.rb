@@ -2,6 +2,7 @@
 require_relative "pokedex/pokemons"
 require_relative "pokedex/moves"
 require_relative "pokemon"
+require_relative "battle"
 class Game
   attr_reader :initial_poke, :initial_poke_name, :name_trainer
 
@@ -91,6 +92,7 @@ class Game
     print "> "
     @initial_poke_name = gets.chomp
     @initial_poke_name = @initial_poke if @initial_poke_name.empty?
+    @poke.name = @initial_poke_name 
   end
 
   def train
@@ -120,19 +122,13 @@ class Game
     puts @current_stats[:hp]
     puts "Random person's #{target} - Level #{level}"
     print "HP: "
-    puts o_current_stats[:hp]
     opponent = Pokemon.new(target)
-    # Battle.new(@name_trainer,@poke,opponent,level)
+    opponent.increase_stats("",level)
+    puts opponent.current_stats[:hp]
+    battle=Battle.new(@name_trainer,@poke,opponent)
+    battle.start
     # podemos llamar a la clase battle
-    o_current_stats = opponent.increase_stats(target, level)
-    o_poke_moves = opponent.poke_info[:moves]
-    o_move = o_poke_moves[rand(0..o_poke_moves.length - 1)]
-    o_priority = Pokedex::MOVES[o_move][:priority]
-    puts "#{@name_trainer}, select your move:"
-    move = @poke.set_current_move
-    p priority = Pokedex::MOVES[move][:priority]
-    p o_move
-    p o_priority
+    
 
     # llamar al metodo set_current_move
   end

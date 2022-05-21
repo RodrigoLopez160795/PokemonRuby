@@ -25,12 +25,31 @@ class Battle
     @poke.increase_stats("", 1) # deberia traer el level de la clase pokemon
     speed = @poke.current_stats[:speed]
     first = who_goes_first(o_priority,priority, o_speed, speed)
+
     if first == @poke 
+      puts"#{@poke.name} used #{move.upcase}!"
       if check_accuracy(move) == true
-        boolean = critical_hit?
+        factor = critical_hit? ? 1.5 : 1
+        multiplier = how_much_effective(move,first)
+        damage = calculate_damage(move, first)
+        final_damage= (damage * factor * multiplier).floor
+        hp = @opponent.current_stats[:hp]
+        current_hp = hp - final_damage
+        puts "And it hit #{@opponent.poke_info[:species]} with #{final_damage} damage"
       end
     else
      check_accuracy(o_move)
+     puts"#{@opponent.poke_info[:species]} used #{o_move.upcase}!"
+      if check_accuracy(o_move) == true
+        factor = critical_hit? ? 1.5 : 1
+        multiplier = how_much_effective(o_move,first)
+        damage = calculate_damage(o_move, first)
+        final_damage= (damage * factor * multiplier).floor
+        hp = @poke.current_stats[:hp]
+        current_hp = hp - final_damage
+        puts "And it hit #{@poke.name} with #{final_damage} damage"
+        puts "Remaining HP: #{current_hp}"
+      end
     end
 
     # Prepare the Battle (print messages and prepare pokemons)
@@ -92,26 +111,47 @@ class Battle
   arr.each do |hash|
     for i in 0..s_type.length-1
       if  hash[:user] == f_type &&  hash[:target] == s_type[i]
-        multiplier= hash[:multiplier]
-        multiplier *= multiplier
+        multiplier= hash[:multiplier] * multiplier
       end
     end
   end
-   string_multiplier(multiplier)#puts de que tan efectivo
+  string_multiplier(multiplier)#puts de que tan efectivo
+  return multiplier 
   end
+
   def string_multiplier(multiplier)
     case multiplier
       when 0 then puts "It's not effective at all"
       when 0.1..0.5 then puts "It's not very effective"
       when 0.6..1 then puts "It's a normal attack"
-      when 1.1..2 then puts "It's super effective" 
+      when 1.1..4 then puts "It's super effective" 
     end
+  end
+
+  def calculate_damage (move, first)
+    second = first == @poke? @opponent : @poke
+    level=1 #deberia obtnerse de la clase pokemon
+    move_type = Pokedex::MOVES[move][:type]
+    special_moves = Pokedex::SPECIAL_MOVE_TYPE
+    # @poke.increase_stats("", 5) #eliminar solo para probar
+    # @opponent.increase_stats("", 5) #eliminar solo para probar
+    if special_moves.include?(move_type)
+      offensive_stat = first.current_stats[:special_attack]
+      target_defensive_stat = second.current_stats[:special_defense]
+    else 
+      offensive_stat = first.current_stats[:attack]
+      target_defensive_stat = second.current_stats[:defense]
+    end
+    move_power = Pokedex::MOVES[move][:power]
+    damage = (((2 * level / 5.0 + 2).floor * offensive_stat * move_power / target_defensive_stat).floor / 50.0).floor + 2
+    return damage
   end
 end
 
-poke = Pokemon.new("Charmander")
-opponent = Pokemon.new("Bulbasaur")
-batalla = Battle.new("Ash", poke, opponent)
+# poke = Pokemon.new("Charmander")
+# opponent = Pokemon.new("Bulbasaur")
+# batalla = Battle.new("Ash", poke, opponent)
+# # batalla.calculate_damage("ember")
 # batalla.start
 # 10.times {p batalla.check_accuracy("scratch")}
-batalla.how_much_effective("vine whip", poke)
+# batalla.how_much_effective("vine whip", poke)

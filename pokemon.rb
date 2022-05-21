@@ -3,11 +3,12 @@ require_relative "pokedex/pokemons"
 
 class Pokemon
   # include neccesary modules
-  attr_reader :current_stats, :poke_info, :level, :hp, :attack, :defense, :special_attack, :special_defense,
+  attr_reader :name, :current_stats, :poke_info, :level, :hp, :attack, :defense, :special_attack, :special_defense,
               :special_defense, :speed
-
+  attr_writer :name
   # (complete parameters)
   def initialize(string)
+    @name=""
     pokemons = Pokedex::POKEMONS
     # string = "bulbasaur" o "charmander" o "squirtle"
     @current_stats = {}
