@@ -9,24 +9,22 @@ class Pokemon
   def initialize(string)
     @name=""
     pokemons = Pokedex::POKEMONS
+    @pokemons = pokemons
     # string = "bulbasaur" o "charmander" o "squirtle"
     @current_stats = {}
-    @poke_info = pokemons[string]
-    base_stats = @poke_info[:base_stats]
-    keys = %i[hp attack defense special_attack special_defense speed]
-    default_values = []
-    keys.length.times { default_values << rand(0..31) }
-    @individual_values = keys.zip(default_values).to_h
-    # puts  @individual_values
+    @poke_info = pokemons[string]   
+    @individual_values = {}
+    generate_individual_values
     @level = 1
     @effort_values = { hp: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0 }
-    @base_values = base_stats
+    @base_values = @poke_info[:base_stats]
     @hp = 0
     @attack = 0
     @defense = 0
     @special_atack = 0
     @special_defense = 0
     @speed = 0
+    @remaining_experience = 0
     # Retrieve pokemon info from Pokedex and set instance variables
     # Calculate Individual Values and store them in instance variable
     # Create instance variable with effort values. All set to 0
@@ -34,6 +32,12 @@ class Pokemon
     # If level is 1, set experience points to 0 in instance variable.
     # If level is not 1, calculate the minimum experience point for that level and store it in instance variable.
     # Calculate pokemon stats and store them in instance variable
+  end
+  def generate_individual_values
+    keys = %i[hp attack defense special_attack special_defense speed]
+    default_values = []
+    keys.length.times { default_values << rand(0..31) }
+    @individual_values = keys.zip(default_values).to_h
   end
 
   def prepare_for_battle
@@ -66,21 +70,44 @@ class Pokemon
     # Complete this
   end
 
-  # def attack(target)
-  # Print attack message 'Tortuguita used MOVE!'
-  # Accuracy check
-  # If the movement is not missed
-  # -- Calculate base damage
-  # -- Critical Hit check
-  # -- If critical, multiply base damage and print message 'It was CRITICAL hit!'
-  # -- Effectiveness check
-  # -- Mutltiply damage by effectiveness multiplier and round down. Print message if neccesary
-  # ---- "It's not very effective..." when effectivenes is less than or equal to 0.5
-  # ---- "It's super effective!" when effectivenes is greater than or equal to 1.5
-  # ---- "It doesn't affect [target name]!" when effectivenes is 0
-  # -- Inflict damage to target and print message "And it hit [target name] with [damage] damage""
-  # Else, print "But it MISSED!"
-  # end
+  
+  def increase_level (gain_experience,growth_rate)
+    gain_experience += @remaining_experience
+    cont = 0
+    while gain_experience > cont
+      cont = calculate_next_level(growth_rate)
+      if gain_experience > cont
+        @level += 1
+        puts "#{@initial_poke_name} you reached level #{@level}!"
+      end
+      gain_experience -= cont
+    end
+    @remaining_experience = gain_experience
+
+  end
+  def calculate_next_level(growth_rate)
+    to_new_level = 0
+    case growth_rate
+    when "slow"
+      to_new_level = ((5*(@level**3))/4.0).round(0) #@level
+    when "medium_slow"
+      to_new_level = ((6*(@level**3)/5.0)-(15*(@level**2))+(100*@level)-140).round(0)
+    when "medium_fast"
+      to_new_level = @level**3
+    when "fast"
+      to_new_level = (4*(@level**3)/5.0).round(0)
+    end
+    to_new_level
+  end
+
+  def change_level(initial_poke,enemy_level)
+    pokemons = Pokedex::POKEMONS
+    poke_info = pokemons[initial_poke] # initial poke
+    base_exp = poke_info[:base_exp]
+    growth_rate = poke_info[:growth_rate].to_s
+    gain_experience = (base_exp * enemy_level / 7).floor
+    increase_level(gain_experience, growth_rate)
+  end
 
   def increase_stats(_target, level)
     # aqui cambian los effort_values dependiendo del target (pokemon oponente)
@@ -119,3 +146,6 @@ end
 # puts poke.level
 # puts poke.hp
 # poke.set_current_move
+
+# poke.change_level("Pikachu",1)
+
