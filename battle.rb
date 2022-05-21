@@ -27,29 +27,9 @@ class Battle
     first = who_goes_first(o_priority,priority, o_speed, speed)
 
     if first == @poke 
-      puts"#{@poke.name} used #{move.upcase}!"
-      if check_accuracy(move) == true
-        factor = critical_hit? ? 1.5 : 1
-        multiplier = how_much_effective(move,first)
-        damage = calculate_damage(move, first)
-        final_damage= (damage * factor * multiplier).floor
-        hp = @opponent.current_stats[:hp]
-        current_hp = hp - final_damage
-        puts "And it hit #{@opponent.poke_info[:species]} with #{final_damage} damage"
-      end
-    else
-     check_accuracy(o_move)
-     puts"#{@opponent.poke_info[:species]} used #{o_move.upcase}!"
-      if check_accuracy(o_move) == true
-        factor = critical_hit? ? 1.5 : 1
-        multiplier = how_much_effective(o_move,first)
-        damage = calculate_damage(o_move, first)
-        final_damage= (damage * factor * multiplier).floor
-        hp = @poke.current_stats[:hp]
-        current_hp = hp - final_damage
-        puts "And it hit #{@poke.name} with #{final_damage} damage"
-        puts "Remaining HP: #{current_hp}"
-      end
+      second_hp=attacks(move,@poke,@opponent)
+    else 
+      first_hp= attacks(move,@opponent,@poke)
     end
 
     # Prepare the Battle (print messages and prepare pokemons)
@@ -61,6 +41,7 @@ class Battle
     # --Calculate which go first and which second
 
     # --First attack second
+    
     # --If second is fainted, print fainted message
     # --If second not fainted, second attack first
     # --If first is fainted, print fainted message
@@ -68,6 +49,23 @@ class Battle
     # Check which player won and print messages
     # If the winner is the Player increase pokemon stats
   end
+
+  def attacks(move, attacker, attacked)
+    puts"#{attacker.name} used #{move.upcase}!"
+      if check_accuracy(move) == true
+        factor = critical_hit? ? 1.5 : 1
+        multiplier = how_much_effective(move,attacker)
+        damage = calculate_damage(move, attacker)
+        final_damage= (damage * factor * multiplier).floor
+        hp = attacked.current_stats[:hp]
+        current_hp = hp - final_damage
+        puts "And it hit #{@opponent.poke_info[:species]} with #{final_damage} damage"
+        return current_hp
+      else 
+        return attacked.current_stats[:hp]
+      end
+  end
+
   def who_goes_first (o_priority,priority,o_speed, speed)
     if o_priority != priority
       first = o_priority > priority ? @opponent : @poke
