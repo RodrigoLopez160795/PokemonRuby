@@ -3,41 +3,30 @@ require_relative "pokedex/pokemons"
 
 class Pokemon
   # include neccesary modules
-  attr_reader :name, :current_stats, :poke_info, :level
-  attr_writer :name
+  attr_accessor :name, :level
+  attr_reader :current_stats, :poke_info, :remaining_experience, :effort_values, :individual_values
+  attr_accessor :total_experience, :exp_to_nxtlvl
+
   # (complete parameters)
   def initialize(string)
-    @name=""
-    pokemons = Pokedex::POKEMONS
-    @pokemons = pokemons
-    # string = "bulbasaur" o "charmander" o "squirtle"
+    @name = ""
+    @poke_info = Pokedex::POKEMONS[string]
+    @growth_rate = @poke_info[:growth_rate].to_s
     @current_stats = {}
-    @poke_info = pokemons[string]   
-    @individual_values = {}
-    generate_individual_values
+    @individual_values = generate_values(31)
     @level = 1
-    @effort_values = { hp: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0 }
+    @effort_values = generate_values(0)
     @base_values = @poke_info[:base_stats]
-    @hp = 0
-    @attack = 0
-    @defense = 0
-    @special_atack = 0
-    @special_defense = 0
-    @speed = 0
     @remaining_experience = 0
-    # Retrieve pokemon info from Pokedex and set instance variables
-    # Calculate Individual Values and store them in instance variable
-    # Create instance variable with effort values. All set to 0
-    # Store the level in instance variable
-    # If level is 1, set experience points to 0 in instance variable.
-    # If level is not 1, calculate the minimum experience point for that level and store it in instance variable.
-    # Calculate pokemon stats and store them in instance variable
+    @total_experience = 0
+    @exp_to_nxtlvl = calculate_next_level
   end
-  def generate_individual_values
+
+  def generate_values(max_value)
     keys = %i[hp attack defense special_attack special_defense speed]
     default_values = []
-    keys.length.times { default_values << rand(0..31) }
-    @individual_values = keys.zip(default_values).to_h
+    keys.length.times { default_values << rand(0..max_value) }
+    keys.zip(default_values).to_h
   end
 
   def prepare_for_battle
@@ -62,7 +51,7 @@ class Pokemon
 
       break
     end
-    puts "-"*50
+    puts "-" * 50
     current_move
   end
 
@@ -70,69 +59,55 @@ class Pokemon
     # Complete this
   end
 
-  
-  def increase_level (gain_experience,growth_rate)
+  def increase_level(gain_experience)
     gain_experience += @remaining_experience
     cont = 0
     while gain_experience > cont
-      cont = calculate_next_level(growth_rate)
+      cont = calculate_next_level
       if gain_experience > cont
         @level += 1
-        puts "#{@initial_poke_name} you reached level #{@level}!"
+        puts "#{@name} reached level #{@level}!"
+        gain_experience -= cont
       end
-      gain_experience -= cont
+      cont = calculate_next_level
     end
     @remaining_experience = gain_experience
-
+    @exp_to_nxtlvl = cont - @remaining_experience
   end
-  def calculate_next_level(growth_rate)
+
+  def calculate_next_level
     to_new_level = 0
-    case growth_rate
+    case @growth_rate
     when "slow"
-      to_new_level = ((5*(@level**3))/4.0).round(0) #@level
+      to_new_level = (((5 * ((@level + 1)**3))) / 4.0).round(0) # @level+1)
     when "medium_slow"
-      to_new_level = ((6*(@level**3)/5.0)-(15*(@level**2))+(100*@level)-140).round(0)
+      to_new_level = (((6 * ((@level + 1)**3)) / 5.0) - ((15 * ((@level + 1)**2))) + (100 * (@level + 1)) - 140).round(0)
     when "medium_fast"
-      to_new_level = @level**3
+      to_new_level = (@level + 1)**3
     when "fast"
-      to_new_level = (4*(@level**3)/5.0).round(0)
+      to_new_level = ((4 * ((@level + 1)**3)) / 5.0).round(0)
     end
     to_new_level
   end
 
-  def change_level(initial_poke,enemy_level)
-    pokemons = Pokedex::POKEMONS
-    poke_info = pokemons[initial_poke] # initial poke
-    base_exp = poke_info[:base_exp]
-    growth_rate = poke_info[:growth_rate].to_s
-    gain_experience = (base_exp * enemy_level / 7).floor
-    increase_level(gain_experience, growth_rate)
+  def increase_effort_values(target)
+    info = target.poke_info[:effort_points]
+    type = info[:type]
+    amount = info[:amount]
+    @effort_values[type] += amount
   end
 
-  def increase_stats(_target, level)
-    # aqui cambian los effort_values dependiendo del target (pokemon oponente)
+  def increase_stats(target = nil)
+    increase_effort_values(target) unless target.nil?
     keys = %i[hp attack defense special_attack special_defense speed]
     stat_values = []
     keys.each do |key|
-      const = key == :hp ? 10 : 5
-      stat_value = ((((2 * @base_values[key]) + @individual_values[key] + @effort_values[key]) * level / 100) + level + const).floor
+      const = key == :hp ? @level + 10 : 5
+      stat_value = ((((2 * @base_values[key]) + @individual_values[key] + @effort_values[key]) * @level / 100) + const).floor
       stat_values << stat_value
     end
     hash = keys.zip(stat_values).to_h
-    # Pensar en una forma más efectiva de aisgnar estos valores
-    @hp = hash[:hp]
-    @attack = hash[:attack]
-    @defense = hash[:defense]
-    @special_atack = hash[:special_atack]
-    @special_defense = hash[:special_defense]
-    @speed = hash[:speed]
-
     @current_stats = hash
-
-    # Increase stats base on the defeated pokemon and print message "#[pokemon name] gained [amount] experience points"
-
-    # If the new experience point are enough to level up, do it and print
-    # message "#[pokemon name] reached level [level]!" # -- Re-calculate the stat
   end
 
   # private methods:
@@ -140,7 +115,10 @@ class Pokemon
 end
 
 # poke = Pokemon.new("Charmander")
-# # poke.increase_stats("hola")
+# poke1 = Pokemon.new("Bulbasaur")
+# p poke.effort_values
+# poke.increase_effort_values(poke1)
+# p poke.effort_values
 
 # puts poke.increase_stats("hola")
 # puts poke.level
@@ -148,4 +126,3 @@ end
 # poke.set_current_move
 
 # poke.change_level("Pikachu",1)
-

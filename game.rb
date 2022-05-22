@@ -1,12 +1,15 @@
 # require neccesary files
 require_relative "pokedex/pokemons"
 require_relative "pokedex/moves"
+require_relative "pokedex/pokemon_art"
 require_relative "pokemon"
 require_relative "battle"
 class Game
   attr_reader :initial_poke, :initial_poke_name, :name_trainer
 
   def initialize
+    puts Art::POKEMONS["Pikachu"]
+    puts " "
     @name_trainer = ""
     @initial_poke = ""
     @initial_poke_name = ""
@@ -26,14 +29,11 @@ class Game
     until action == "Exit"
       case action
       when "Train"
-
         train
         action = menu
       when "Leader"
-        challenge_leader
-        action = menu
+        action = challenge_leader == true ? "Exit" : menu
       when "Stats"
-
         show_stats
         action = menu
       end
@@ -68,8 +68,10 @@ class Game
 
       break
     end
+    puts Art::POKEMONS[@initial_poke]
+    puts "\n \n"
     @poke = Pokemon.new(@initial_poke)
-    @current_stats = @poke.increase_stats("target", 1)
+    @current_stats = @poke.increase_stats
   end
 
   def print_welcome
@@ -92,13 +94,13 @@ class Game
     print "> "
     @initial_poke_name = gets.chomp
     @initial_poke_name = @initial_poke if @initial_poke_name.empty?
-    @poke.name = @initial_poke_name 
+    @poke.name = @initial_poke_name
   end
 
   def train
     pokemons = Pokedex::POKEMONS
     target = pokemons.keys[rand(0..pokemons.length - 1)]
-    level = rand(1..10)
+    level = rand(1..@poke.level + 1)
     puts "#{@name_trainer} challenge Random Person for training"
     puts "Random Person has a #{target} level #{level}"
     puts "What do you want to do now? \n"
@@ -113,55 +115,65 @@ class Game
     end
   end
 
-  def fight(target, level)
-    puts "Random Person sent out #{target.upcase}!"
-    puts "Great master sent out #{@initial_poke_name.upcase}!"
+  def fight(target, level, o_trainer = "Random Person")
+    puts "#{o_trainer} sent out #{target.upcase}!"
+    puts "#{@name_trainer} sent out #{@initial_poke_name.upcase}!"
     puts "-------------------Battle Start!-------------------"
     puts "#{@name_trainer}'s #{@initial_poke_name} - Level #{@poke.level}"
     print "HP: "
     puts @current_stats[:hp]
-    puts "Random person's #{target} - Level #{level}"
+    puts "#{o_trainer}'s #{target} - Level #{level}"
     print "HP: "
     opponent = Pokemon.new(target)
-    opponent.increase_stats("",level)
+    opponent.name = target
+    opponent.level = level
+    opponent.increase_stats
     puts opponent.current_stats[:hp]
-    battle=Battle.new(@name_trainer,@poke,opponent)
+    battle = Battle.new(@name_trainer, @poke, o_trainer, opponent)
     battle.start
-    # podemos llamar a la clase battle
-    
-
-    # llamar al metodo set_current_move
+    battle.win
   end
 
   def challenge_leader
-    # Complete this
+    win = false
+    target = "Onix"
+    level = 10
+    puts "#{@name_trainer} challenge the Gym Leader Brock for a fight"
+    puts "Brock has a #{target} level #{level}"
+    puts "What do you want to do now? \n"
+    puts "1. Fight        2. Leave"
+    loop do
+      print "> "
+      action = gets.chomp
+      next unless ["Leave", "Fight"].include?(action)
+
+      win = fight(target, level, "Brock") if action == "Fight"
+      break
+    end
+    win
   end
 
   def show_stats
     pokemons = Pokedex::POKEMONS
     poke_info = pokemons[@initial_poke]
-    # # Debemos corregir de donde sacamos los stats
-    puts "\n#{@initial_poke_name} :"
-    puts "Kind: #{@initial_poke}"
-    puts "Type: #{poke_info[:type].join(', ')}"
+    puts "\n#{@poke.name} :"
+    puts "Kind: #{@poke.poke_info[:species]}"
+    puts "Type: #{@poke.poke_info[:type].join(', ')}"
     puts "Stats:"
-    # puts "HP: #{@poke.hp}"
-    # puts "Attack: #{@poke.attack}"
-    # puts "Defense: #{@poke.defense}"
-    # puts "Special Attack: #{@poke.special_attack}"
-    # puts "Special Defense: #{@poke.special_defense}"
-    # puts "Speed: #{@poke.speed}"
     labels = ["HP: ", "Attack: ", "Defense: ", "Special Attack: ", "Special Defense: ", "Speed: "]
     (0..labels.length - 1).each do |i|
       print labels[i]
-      puts @current_stats.values[i]
+      puts @poke.current_stats.values[i]
     end
     print "Experience Points: "
-    puts 0 # esto cambiara
+    puts @poke.total_experience
+    print "Experience Points to next level: "
+    puts @poke.exp_to_nxtlvl
   end
 
   def goodbye
-    # Complete this
+    puts "Thanks for playing Pokemon Ruby"
+    puts "This game was created with love by: Rodrigo, Erik, Joshua, Steph"
   end
 
   def menu
