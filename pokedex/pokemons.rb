@@ -85,7 +85,7 @@ module Pokedex
       species: "Jigglypuff",
       type: %i[fairy normal],
       base_exp: 95,
-      effot_point: { type: :hp, amount: 2 },
+      effort_points: { type: :hp, amount: 2 },
       growth_rate: :fast,
       base_stats: { hp: 115, attack: 45, defense: 20, special_attack: 45, special_defense: 25, speed: 20 },
       moves: ["play rough", "confusion"]
