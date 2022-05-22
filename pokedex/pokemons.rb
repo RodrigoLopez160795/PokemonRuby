@@ -52,7 +52,7 @@ module Pokedex
       effort_points: { type: :speed, amount: 2 },
       growth_rate: :medium_fast,
       base_stats: { hp: 35, attack: 55, defense: 40, special_attack: 50, special_defense: 50, speed: 90 },
-      moves: ["thunder shock", "quick attack"]
+      moves: ["thunder shock", "quick attack", "iron tail"]
     },
     "Onix" => {
       species: "Onix",
@@ -62,6 +62,33 @@ module Pokedex
       growth_rate: :medium_fast,
       base_stats: { hp: 35, attack: 45, defense: 160, special_attack: 30, special_defense: 45, speed: 70 },
       moves: ["tackle", "rock throw"]
+    },
+    "Mewtwo" => {
+      species: "Mewtwo",
+      type: %i[psychic],
+      base_exp: 120,
+      effort_points: { type: :special_attack, amount: 3 },
+      growth_rate: :medium_fast,
+      base_stats: { hp: 106, attack: 110, defense: 90, special_attack: 154, special_defense: 90, speed: 130 },
+      moves: ["persuit", "confusion"]
+    },
+    "Machop" => {
+      species: "Machop",
+      type: %i[fighting],
+      base_exp: 61,
+      effort_points: { type: :attack, amount: 1 },
+      growth_rate: :medium_slow,
+      base_stats: { hp: 70, attack: 80, defense: 50, special_attack: 35, special_defense: 35, speed: 35 },
+      moves: ["high jump kick", "tackle"]
+    },
+    "Jigglypuff" => {
+      species: "Jigglypuff",
+      type: %i[fairy normal],
+      base_exp: 95,
+      effot_point: { type: :hp, amount: 2 },
+      growth_rate: :fast,
+      base_stats: { hp: 115, attack: 45, defense: 20, special_attack: 45, special_defense: 25, speed: 20 },
+      moves: ["play rough", "confusion"]
     }
   }.freeze
 

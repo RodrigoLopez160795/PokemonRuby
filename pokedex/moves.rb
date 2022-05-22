@@ -69,6 +69,34 @@ module Pokedex
       power: 50,
       accuracy: 90,
       priority: 0
+    },
+    "confusion" => {
+      name: "confusion",
+      type: :psychic,
+      power: 50,
+      accuracy: 100,
+      priority: 1
+    },
+    "high jump kick" => {
+      name: "high jump kick",
+      type: :fighting,
+      power: 130,
+      accuracy: 90,
+      priority: 0
+    },
+    "play rough" => {
+      name: "play rough",
+      type: :fairy,
+      power: 90,
+      accuracy: 90,
+      priority: 1
+    },
+    "iron tail" => {
+      name: "iron tail",
+      type: :steel,
+      power: 100,
+      accuracy: 75,
+      priority: 0
     }
   }.freeze
 
