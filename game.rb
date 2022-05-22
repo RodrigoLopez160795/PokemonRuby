@@ -15,6 +15,7 @@ class Game
     @initial_poke_name = ""
     @poke = ""
     @current_stats = {}
+    @difficulty = 1
   end
 
   def start
@@ -62,7 +63,7 @@ class Game
     loop do
       print "> "
       @initial_poke = gets.chomp
-      initial_pokes = ["Bulbasaur", "Charmander", "Squirtle"]
+      initial_pokes = ["Bulbasaur", "Charmander", "Squirtle", "Pikachu"]
       valid = initial_pokes.include?(@initial_poke)
       next unless valid
 
@@ -80,6 +81,7 @@ class Game
     puts "#$##$##$##$ ---        Pokemon Ruby         --- #$##$##$#$#"
     puts "#$#$#$#$#$#$#$                               $#$#$#$#$#$#$#"
     puts "#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$#$# \n\n"
+    choose_difficulty
     puts "Hello there! Welcome to the world of POKEMON! My name is OAK!"
     puts "People call me the POKEMON PROF! \n\n"
     puts "This world is inhabited by creatures called POKEMON! For some"
@@ -97,10 +99,28 @@ class Game
     @poke.name = @initial_poke_name
   end
 
+  def choose_difficulty
+    puts "\nSelect difficulty"
+    puts "1.Easy   2.Medium    3.Hard"
+    puts "Choose a number:"
+    valid_difficulty
+  end
+
+  def valid_difficulty
+    loop do
+      print "> "
+      difficulty = gets.chomp.to_i
+      next unless [1, 2, 3].include?(difficulty)
+
+      @difficulty = difficulty
+      break
+    end
+  end
+
   def train
     pokemons = Pokedex::POKEMONS
     target = pokemons.keys[rand(0..pokemons.length - 1)]
-    level = rand(1..@poke.level + 1)
+    level = rand(1..@poke.level + @difficulty)
     puts "#{@name_trainer} challenge Random Person for training"
     puts "Random Person has a #{target} level #{level}"
     puts "What do you want to do now? \n"
@@ -154,8 +174,8 @@ class Game
   end
 
   def show_stats
-    pokemons = Pokedex::POKEMONS
-    poke_info = pokemons[@initial_poke]
+    # pokemons = Pokedex::POKEMONS
+    # poke_info = pokemons[@initial_poke]
     puts "\n#{@poke.name} :"
     puts "Kind: #{@poke.poke_info[:species]}"
     puts "Type: #{@poke.poke_info[:type].join(', ')}"
@@ -173,7 +193,7 @@ class Game
 
   def goodbye
     puts "Thanks for playing Pokemon Ruby"
-    puts "This game was created with love by: Rodrigo, Erik, Joshua, Steph"
+    puts "This game was created with love by Rodrigo, Erik, Joshua and Steph"
   end
 
   def menu

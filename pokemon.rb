@@ -72,12 +72,7 @@ class Pokemon
       cont = calculate_next_level
     end
     @remaining_experience = gain_experience
-<<<<<<< HEAD
-    p @remaining_experience
-
-=======
     @exp_to_nxtlvl = cont - @remaining_experience
->>>>>>> ffd79901f13bcf8c0d6fd63daff102cd57c17dd7
   end
 
   def calculate_next_level
@@ -86,7 +81,10 @@ class Pokemon
     when "slow"
       to_new_level = (((5 * ((@level + 1)**3))) / 4.0).round(0) # @level+1)
     when "medium_slow"
-      to_new_level = (((6 * ((@level + 1)**3)) / 5.0) - ((15 * ((@level + 1)**2))) + (100 * (@level + 1)) - 140).round(0)
+      a = ((6 * ((@level + 1)**3)) / 5.0)
+      b = ((15 * ((@level + 1)**2)))
+      c = (100 * (@level + 1))
+      to_new_level = (a - b + c - 140).round(0)
     when "medium_fast"
       to_new_level = (@level + 1)**3
     when "fast"
@@ -108,7 +106,8 @@ class Pokemon
     stat_values = []
     keys.each do |key|
       const = key == :hp ? @level + 10 : 5
-      stat_value = ((((2 * @base_values[key]) + @individual_values[key] + @effort_values[key]) * @level / 100) + const).floor
+      a = (2 * @base_values[key])
+      stat_value = (((a + @individual_values[key] + @effort_values[key]) * @level / 100) + const).floor
       stat_values << stat_value
     end
     hash = keys.zip(stat_values).to_h
@@ -130,9 +129,4 @@ end
 # puts poke.hp
 # poke.set_current_move
 
-<<<<<<< HEAD
-poke.change_level("Pikachu",10)
-
-=======
 # poke.change_level("Pikachu",1)
->>>>>>> ffd79901f13bcf8c0d6fd63daff102cd57c17dd7

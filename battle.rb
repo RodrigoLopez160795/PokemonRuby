@@ -17,21 +17,17 @@ class Battle
   def start
     poke_hp = @poke.current_stats[:hp]
     opponnent_hp = @opponent.current_stats[:hp]
-    # first = ""
-
     while opponnent_hp.positive? && poke_hp.positive?
       moves = choosing_moves
       move = moves[0]
       o_move = moves[1]
       first = who_goes_first(move, o_move)
       # second = first == @poke? @opponent : @poke
-
       if first == @poke
         f_remaining_hp = poke_hp
         s_remaining_hp = opponnent_hp
         opponnent_hp = attacks(move, @poke, @opponent, s_remaining_hp)
         poke_hp = attacks(o_move, @opponent, @poke, f_remaining_hp) if opponnent_hp.positive?
-
       else
         s_remaining_hp = poke_hp
         f_remaining_hp = opponnent_hp
@@ -39,6 +35,10 @@ class Battle
         opponnent_hp = attacks(move, @poke, @opponent, f_remaining_hp) if poke_hp.positive?
       end
     end
+    who_won?(poke_hp)
+  end
+
+  def who_won?(poke_hp)
     puts "--------------------------------------------------"
     winner = if poke_hp.positive?
                @poke
@@ -60,7 +60,7 @@ class Battle
       @poke.increase_level(gain_experience)
       @poke.increase_stats(@opponent)
       @win = true
-      puts "Congratulations!" if @o_trainer == "Brock"
+      puts "Congratulations! You win the BOULDER BADGE." if @o_trainer == "Brock"
     else
       puts "#{@poke.name} FAINTED!"
       puts "--------------------------------------------------"
@@ -80,8 +80,7 @@ class Battle
       puts ""
       current_hp
     else
-      return attacked.current_stats[:hp]
-      puts ""
+      attacked.current_stats[:hp]
     end
   end
 
@@ -103,7 +102,7 @@ class Battle
     if o_priority != priority
       first = o_priority > priority ? @opponent : @poke
     elsif o_speed != speed
-      first = o_priority > priority ? @opponent : @poke
+      first = o_speed > speed ? @opponent : @poke
     else
       options = [@poke, @opponent]
       first = options[rand(0..1)]
