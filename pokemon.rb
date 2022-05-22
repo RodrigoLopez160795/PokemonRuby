@@ -78,6 +78,7 @@ class Pokemon
       gain_experience -= cont
     end
     @remaining_experience = gain_experience
+    p @remaining_experience
 
   end
   def calculate_next_level(growth_rate)
@@ -142,5 +143,5 @@ poke = Pokemon.new("Charmander")
 # puts poke.level
 # puts poke.hp
 
-# poke.change_level("Pikachu",1)
+poke.change_level("Pikachu",10)
 
