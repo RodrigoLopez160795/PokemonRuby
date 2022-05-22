@@ -1,17 +1,32 @@
 # require neccesary files
+require_relative "pokedex/pokemons"
 
 class Pokemon
   # include neccesary modules
+  attr_accessor :name, :level
+  attr_reader :current_stats, :poke_info, :remaining_experience, :effort_values, :individual_values
+  attr_accessor :total_experience, :exp_to_nxtlvl
 
   # (complete parameters)
-  def initialize
-    # Retrieve pokemon info from Pokedex and set instance variables
-    # Calculate Individual Values and store them in instance variable
-    # Create instance variable with effort values. All set to 0
-    # Store the level in instance variable
-    # If level is 1, set experience points to 0 in instance variable.
-    # If level is not 1, calculate the minimum experience point for that level and store it in instance variable.
-    # Calculate pokemon stats and store them in instance variable
+  def initialize(string)
+    @name = ""
+    @poke_info = Pokedex::POKEMONS[string]
+    @growth_rate = @poke_info[:growth_rate].to_s
+    @current_stats = {}
+    @individual_values = generate_values(31)
+    @level = 1
+    @effort_values = generate_values(0)
+    @base_values = @poke_info[:base_stats]
+    @remaining_experience = 0
+    @total_experience = 0
+    @exp_to_nxtlvl = calculate_next_level
+  end
+
+  def generate_values(max_value)
+    keys = %i[hp attack defense special_attack special_defense speed]
+    default_values = []
+    keys.length.times { default_values << rand(0..max_value) }
+    keys.zip(default_values).to_h
   end
 
   def prepare_for_battle
@@ -23,36 +38,91 @@ class Pokemon
   end
 
   def set_current_move
-    # Complete this
+    current_move = ""
+    poke_moves = @poke_info[:moves]
+    (1..poke_moves.length).each do |i|
+      print "#{i}. #{poke_moves[i - 1]}      "
+    end
+    puts ""
+    loop do
+      print "> "
+      current_move = gets.chomp
+      next unless poke_moves.include?(current_move)
+
+      break
+    end
+    puts "-" * 50
+    current_move
   end
 
   def fainted?
     # Complete this
   end
 
-  def attack(target)
-    # Print attack message 'Tortuguita used MOVE!'
-    # Accuracy check
-    # If the movement is not missed
-    # -- Calculate base damage
-    # -- Critical Hit check
-    # -- If critical, multiply base damage and print message 'It was CRITICAL hit!'
-    # -- Effectiveness check
-    # -- Mutltiply damage by effectiveness multiplier and round down. Print message if neccesary
-    # ---- "It's not very effective..." when effectivenes is less than or equal to 0.5
-    # ---- "It's super effective!" when effectivenes is greater than or equal to 1.5
-    # ---- "It doesn't affect [target name]!" when effectivenes is 0
-    # -- Inflict damage to target and print message "And it hit [target name] with [damage] damage""
-    # Else, print "But it MISSED!"
+  def increase_level(gain_experience)
+    gain_experience += @remaining_experience
+    cont = 0
+    while gain_experience > cont
+      cont = calculate_next_level
+      if gain_experience > cont
+        @level += 1
+        puts "#{@name} reached level #{@level}!"
+        gain_experience -= cont
+      end
+      cont = calculate_next_level
+    end
+    @remaining_experience = gain_experience
+    @exp_to_nxtlvl = cont - @remaining_experience
   end
 
-  def increase_stats(target)
-    # Increase stats base on the defeated pokemon and print message "#[pokemon name] gained [amount] experience points"
+  def calculate_next_level
+    to_new_level = 0
+    case @growth_rate
+    when "slow"
+      to_new_level = (((5 * ((@level + 1)**3))) / 4.0).round(0) # @level+1)
+    when "medium_slow"
+      to_new_level = (((6 * ((@level + 1)**3)) / 5.0) - ((15 * ((@level + 1)**2))) + (100 * (@level + 1)) - 140).round(0)
+    when "medium_fast"
+      to_new_level = (@level + 1)**3
+    when "fast"
+      to_new_level = ((4 * ((@level + 1)**3)) / 5.0).round(0)
+    end
+    to_new_level
+  end
 
-    # If the new experience point are enough to level up, do it and print
-    # message "#[pokemon name] reached level [level]!" # -- Re-calculate the stat
+  def increase_effort_values(target)
+    info = target.poke_info[:effort_points]
+    type = info[:type]
+    amount = info[:amount]
+    @effort_values[type] += amount
+  end
+
+  def increase_stats(target = nil)
+    increase_effort_values(target) unless target.nil?
+    keys = %i[hp attack defense special_attack special_defense speed]
+    stat_values = []
+    keys.each do |key|
+      const = key == :hp ? @level + 10 : 5
+      stat_value = ((((2 * @base_values[key]) + @individual_values[key] + @effort_values[key]) * @level / 100) + const).floor
+      stat_values << stat_value
+    end
+    hash = keys.zip(stat_values).to_h
+    @current_stats = hash
   end
 
   # private methods:
   # Create here auxiliary methods
 end
+
+# poke = Pokemon.new("Charmander")
+# poke1 = Pokemon.new("Bulbasaur")
+# p poke.effort_values
+# poke.increase_effort_values(poke1)
+# p poke.effort_values
+
+# puts poke.increase_stats("hola")
+# puts poke.level
+# puts poke.hp
+# poke.set_current_move
+
+# poke.change_level("Pikachu",1)
