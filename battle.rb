@@ -160,17 +160,17 @@ class Battle
     end
   end
 
-  def calculate_damage(move, first)
-    second = first == @poke ? @opponent : @poke
-    level = 1 # deberia obtnerse de la clase pokemon
+  def calculate_damage(move, attacker)
+    attacked = attacker == @poke ? @opponent : @poke
+    level = attacker.level
     move_type = Pokedex::MOVES[move][:type]
     special_moves = Pokedex::SPECIAL_MOVE_TYPE
     if special_moves.include?(move_type)
-      offensive_stat = first.current_stats[:special_attack]
-      target_defensive_stat = second.current_stats[:special_defense]
+      offensive_stat = attacker.current_stats[:special_attack]
+      target_defensive_stat = attacked.current_stats[:special_defense]
     else
-      offensive_stat = first.current_stats[:attack]
-      target_defensive_stat = second.current_stats[:defense]
+      offensive_stat = attacker.current_stats[:attack]
+      target_defensive_stat = attacked.current_stats[:defense]
     end
     move_power = Pokedex::MOVES[move][:power]
     ((((2 * level / 5.0) + 2).floor * offensive_stat * move_power / target_defensive_stat).floor / 50.0).floor + 2
