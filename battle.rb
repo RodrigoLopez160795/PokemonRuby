@@ -76,7 +76,7 @@ class Battle
       damage = calculate_damage(move, attacker)
       final_damage = (damage * factor * multiplier).floor
       current_hp -= final_damage
-      puts "And it hit #{@opponent.poke_info[:species]} with #{final_damage} damage"
+      puts "And it hit #{attacked.name} with #{final_damage} damage"
       puts ""
       current_hp
     else
