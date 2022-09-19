@@ -141,7 +141,7 @@ class Game
     puts "-------------------Battle Start!-------------------"
     puts "#{@name_trainer}'s #{@initial_poke_name} - Level #{@poke.level}"
     print "HP: "
-    puts @current_stats[:hp]
+    puts @poke.current_stats[:hp]
     puts "#{o_trainer}'s #{target} - Level #{level}"
     print "HP: "
     opponent = Pokemon.new(target)
